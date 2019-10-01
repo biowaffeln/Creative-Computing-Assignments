@@ -15,6 +15,8 @@ using namespace std;
 int colorOutputs[3] = {GREEN_OUTPUT_PORT, ORANGE_OUTPUT_PORT, RED_OUTPUT_PORT};
 int colorInputs[3] = {GREEN_OUTPUT_PORT, ORANGE_OUTPUT_PORT, RED_OUTPUT_PORT};
 
+const int NUM_LEVELS = 3;
+
 enum State
 {
   idle,
@@ -69,6 +71,20 @@ bool matching(vector<int> input, vector<int> sequence)
   return true;
 }
 
+void powerAllOn()
+{
+  digitalWrite(GREEN_OUTPUT_PORT, HIGH);
+  digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
+  digitalWrite(RED_OUTPUT_PORT, HIGH);
+}
+
+void powerAllOff()
+{
+  digitalWrite(GREEN_OUTPUT_PORT, LOW);
+  digitalWrite(ORANGE_OUTPUT_PORT, LOW);
+  digitalWrite(RED_OUTPUT_PORT, LOW);
+}
+
 void setup()
 {
   /* initial state */
@@ -86,9 +102,8 @@ void setup()
   pinMode(GREEN_OUTPUT_PORT, OUTPUT);
   pinMode(ORANGE_OUTPUT_PORT, OUTPUT);
   pinMode(RED_OUTPUT_PORT, OUTPUT);
-  digitalWrite(GREEN_OUTPUT_PORT, LOW);
-  digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-  digitalWrite(RED_OUTPUT_PORT, LOW);
+
+  powerAllOff();
 
   /* for debugging */
   // Serial.begin(9600);
@@ -99,9 +114,7 @@ void loop()
   /* reset */
   if (digitalRead(8) == HIGH)
   {
-    digitalWrite(GREEN_OUTPUT_PORT, LOW);
-    digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-    digitalWrite(RED_OUTPUT_PORT, LOW);
+    powerAllOff();
     level = 1;
     userInput.clear();
     gameState = State::start;
@@ -110,21 +123,13 @@ void loop()
   /* start state */
   if (gameState == State::start)
   {
-    digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-    digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-    digitalWrite(RED_OUTPUT_PORT, HIGH);
+    powerAllOn();
     delay(500);
-    digitalWrite(GREEN_OUTPUT_PORT, LOW);
-    digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-    digitalWrite(RED_OUTPUT_PORT, LOW);
+    powerAllOff();
     delay(500);
-    digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-    digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-    digitalWrite(RED_OUTPUT_PORT, HIGH);
+    powerAllOn();
     delay(500);
-    digitalWrite(GREEN_OUTPUT_PORT, LOW);
-    digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-    digitalWrite(RED_OUTPUT_PORT, LOW);
+    powerAllOff();
     delay(1000);
     levelSequence = generateSequence(level);
     gameState = State::blinking;
@@ -161,23 +166,15 @@ void loop()
             userInput.clear();
             levelSequence.clear();
             level++;
-            digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-            digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-            digitalWrite(RED_OUTPUT_PORT, HIGH);
+            powerAllOn();
             delay(200);
-            digitalWrite(GREEN_OUTPUT_PORT, LOW);
-            digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-            digitalWrite(RED_OUTPUT_PORT, LOW);
+            powerAllOff();
             delay(200);
-            digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-            digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-            digitalWrite(RED_OUTPUT_PORT, HIGH);
+            powerAllOn();
             delay(200);
-            digitalWrite(GREEN_OUTPUT_PORT, LOW);
-            digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-            digitalWrite(RED_OUTPUT_PORT, LOW);
+            powerAllOff();
 
-            if (level > 3)
+            if (level > NUM_LEVELS)
             {
               delay(500);
               gameState = State::finish;
@@ -194,13 +191,9 @@ void loop()
         {
           // restart level;
           userInput.clear();
-          digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-          digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-          digitalWrite(RED_OUTPUT_PORT, HIGH);
+          powerAllOn();
           delay(1000);
-          digitalWrite(GREEN_OUTPUT_PORT, LOW);
-          digitalWrite(ORANGE_OUTPUT_PORT, LOW);
-          digitalWrite(RED_OUTPUT_PORT, LOW);
+          powerAllOff();
           delay(1000);
           gameState = State::blinking;
         }
@@ -211,8 +204,6 @@ void loop()
   /* finish */
   if (gameState == State::finish)
   {
-    digitalWrite(GREEN_OUTPUT_PORT, HIGH);
-    digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
-    digitalWrite(RED_OUTPUT_PORT, HIGH);
+    powerAllOn();
   }
 }
