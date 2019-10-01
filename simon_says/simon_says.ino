@@ -1,5 +1,6 @@
 #include <ArduinoSTL.h>
-#include <list>
+#include <vector>
+using namespace std;
 
 #define RESTART_INPUT_PORT 8
 
@@ -11,7 +12,8 @@
 #define ORANGE_OUTPUT_PORT 11
 #define RED_OUTPUT_PORT 12
 
-int colors[3] = {GREEN_OUTPUT_PORT, ORANGE_OUTPUT_PORT, RED_OUTPUT_PORT};
+int colorOutputs[3] = {GREEN_OUTPUT_PORT, ORANGE_OUTPUT_PORT, RED_OUTPUT_PORT};
+int colorInputs[3] = {GREEN_OUTPUT_PORT, ORANGE_OUTPUT_PORT, RED_OUTPUT_PORT};
 
 enum State
 {
@@ -24,22 +26,22 @@ enum State
 
 State gameState;
 int level;
-std::list<int> sequence;
-std::list<int> userInput;
+vector<int> levelSequence;
+vector<int> userInput;
 
 /* helper functions */
 
-std::list<int> generateSequence(int currentLevel)
+vector<int> generateSequence(int currentLevel)
 {
   int listLength = currentLevel + 2;
 
-  std::list<int> sequence;
+  vector<int> sequence;
   int prevItem;
   int i = 0;
 
   while (i < listLength)
   {
-    int color = colors[rand() % 3];
+    int color = colorOutputs[rand() % 3];
     if (color != prevItem)
     {
       sequence.push_back(color);
@@ -49,6 +51,22 @@ std::list<int> generateSequence(int currentLevel)
   }
 
   return sequence;
+}
+
+bool matching(vector<int> input, vector<int> sequence)
+{
+  /* should never happen, but eh, better be safe */
+  if (input.size() > sequence.size())
+    return false;
+
+  for (int i = 0; i < input.size(); i++)
+  {
+    if (input[i] != sequence[i])
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 void setup()
@@ -81,6 +99,11 @@ void loop()
   /* reset */
   if (digitalRead(8) == HIGH)
   {
+    digitalWrite(GREEN_OUTPUT_PORT, LOW);
+    digitalWrite(ORANGE_OUTPUT_PORT, LOW);
+    digitalWrite(RED_OUTPUT_PORT, LOW);
+    level = 1;
+    userInput.clear();
     gameState = State::start;
   }
 
@@ -103,6 +126,7 @@ void loop()
     digitalWrite(ORANGE_OUTPUT_PORT, LOW);
     digitalWrite(RED_OUTPUT_PORT, LOW);
     delay(1000);
+    levelSequence = generateSequence(level);
     gameState = State::blinking;
   }
 
@@ -110,9 +134,7 @@ void loop()
   if (gameState == State::blinking)
   {
 
-    sequence = generateSequence(level);
-
-    for (const auto &port : sequence)
+    for (const auto &port : levelSequence)
     {
       digitalWrite(port, HIGH);
       delay(500);
@@ -125,12 +147,70 @@ void loop()
   /* input */
   if (gameState == State::input)
   {
+    for (const auto &port : colorInputs)
+    {
+      if (digitalRead(port) == HIGH && (userInput.empty() || port != userInput.back()))
+      {
+        userInput.push_back(port);
+
+        if (matching(userInput, levelSequence))
+        {
+          if (userInput.size() == levelSequence.size())
+          {
+            // go to next level;
+            userInput.clear();
+            levelSequence.clear();
+            level++;
+            digitalWrite(GREEN_OUTPUT_PORT, HIGH);
+            digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
+            digitalWrite(RED_OUTPUT_PORT, HIGH);
+            delay(200);
+            digitalWrite(GREEN_OUTPUT_PORT, LOW);
+            digitalWrite(ORANGE_OUTPUT_PORT, LOW);
+            digitalWrite(RED_OUTPUT_PORT, LOW);
+            delay(200);
+            digitalWrite(GREEN_OUTPUT_PORT, HIGH);
+            digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
+            digitalWrite(RED_OUTPUT_PORT, HIGH);
+            delay(200);
+            digitalWrite(GREEN_OUTPUT_PORT, LOW);
+            digitalWrite(ORANGE_OUTPUT_PORT, LOW);
+            digitalWrite(RED_OUTPUT_PORT, LOW);
+
+            if (level > 3)
+            {
+              delay(500);
+              gameState = State::finish;
+            }
+            else
+            {
+              delay(1000);
+              levelSequence = generateSequence(level);
+              gameState = State::blinking;
+            }
+          }
+        }
+        else
+        {
+          // restart level;
+          userInput.clear();
+          digitalWrite(GREEN_OUTPUT_PORT, HIGH);
+          digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
+          digitalWrite(RED_OUTPUT_PORT, HIGH);
+          delay(1000);
+          digitalWrite(GREEN_OUTPUT_PORT, LOW);
+          digitalWrite(ORANGE_OUTPUT_PORT, LOW);
+          digitalWrite(RED_OUTPUT_PORT, LOW);
+          delay(1000);
+          gameState = State::blinking;
+        }
+      }
+    }
   }
 
   /* finish */
   if (gameState == State::finish)
   {
-    delay(500);
     digitalWrite(GREEN_OUTPUT_PORT, HIGH);
     digitalWrite(ORANGE_OUTPUT_PORT, HIGH);
     digitalWrite(RED_OUTPUT_PORT, HIGH);
