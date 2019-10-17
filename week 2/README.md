@@ -20,4 +20,5 @@ You can see the code for this example under `serial_data/serial_data.ino`.
 
 ## Lab 02 - 04
 
-Unfortunately I didn't realize we were supposed to take pictures of the labs, so I didn't take any... Sorry, I promise there will be more pictures here for next week!
+I did the rest of the exercises together in a group.
+Unfortunately I didn't realize we were supposed to take pictures of the labs, so this section looks kind of empty for this week... I'm sorry, I promise there will be more pictures for next week!
