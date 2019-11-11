@@ -1,4 +1,4 @@
-# week three documentation
+# week four documentation
 
 ## lab 2 - hooking up a servo
 
