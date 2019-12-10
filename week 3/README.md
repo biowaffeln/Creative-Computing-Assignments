@@ -2,6 +2,7 @@
 
 ## playing with fades
 
+The task for this exercise was to use Pulse Width Modulation (PWM) to create a [fading LED](https://www.arduino.cc/en/Tutorial/Fade) effect.
 The final version of the soldered board:
 
 <p float="left">
@@ -17,7 +18,8 @@ Even though it wasn't required, here's a [video of us measuring the voltage](htt
 
 ## dark detecting LED
 
+The last exercise was using Phototransistors to create an LED that lights up if the brightness levels fall under a certain threshold. The video of the final result for this exercise:
+
 [
 ![dark detecting LED](images/dark_detecting_led.jpg)
 ](https://photos.app.goo.gl/bmeCjBpv9UqbdV3v8)
-(click on the image of the video)
